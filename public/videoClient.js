@@ -1,4 +1,6 @@
-const socket = io('http://localhost:3002');
+const socket = io(SOCKET_URL, {
+  transports: ['websocket'],
+});
 const videoGrid = document.querySelector('#video-grid');
 
 const myPeer = new Peer();
@@ -9,7 +11,10 @@ const peers = {};
 
 navigator.mediaDevices
   .getUserMedia({
-    video: true,
+    video: {
+      width: { min: 1024, ideal: 1280, max: 1920 },
+      height: { min: 576, ideal: 720, max: 1080 },
+    },
     audio: true,
   })
   .then((stream) => {
@@ -26,8 +31,11 @@ navigator.mediaDevices
     });
 
     socket.on('user-connected', (userId) => {
-      setTimeout(connectToNewUser, 1000, userId, stream);
+      setTimeout(connectToNewUser, 3000, userId, stream);
     });
+  })
+  .catch(function (error) {
+    alert(error);
   });
 
 myPeer.on('open', (id) => {
@@ -40,9 +48,14 @@ socket.on('user-disconnect', (userID) => {
 
 function addVideoStream(video, stream) {
   video.srcObject = stream;
-  video.addEventListener('loadedmetadata', () => {
-    video.play();
-  });
+  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) video.autoplay = true;
+  video.addEventListener(
+    'loadeddata',
+    () => {
+      video.play();
+    },
+    false,
+  );
   videoGrid.append(video);
 }
 

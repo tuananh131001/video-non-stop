@@ -14,6 +14,9 @@ export class AppController {
 
   @Get('/:roomId')
   createRoom(@Res() res: Response, @Param() params: any) {
-    return res.render('room', { roomId: params.roomId });
+    return res.render('room', {
+      roomId: params.roomId,
+      SOCKET_URL: process.env.SOCKET_URL,
+    });
   }
 }
